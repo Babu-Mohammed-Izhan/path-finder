@@ -1,6 +1,6 @@
 export const INITIAL_VIEW_STATE = {
-  longitude: -0.127,
-  latitude: 51.507,
+  longitude: 139.722,
+  latitude: 35.6895,
   zoom: 13,
   pitch: 0,
   bearing: 0,

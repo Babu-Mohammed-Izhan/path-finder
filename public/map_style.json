@@ -1928,7 +1928,7 @@
         ["==", "class", "ocean"]
       ],
       "layout": {
-        "text-field": "{name}",
+        "text-field": "{name_en}",
         "symbol-placement": "point",
         "text-size": {
           "stops": [
@@ -1973,7 +1973,7 @@
         ["==", "class", "sea"]
       ],
       "layout": {
-        "text-field": "{name}",
+        "text-field": "{name_en}",
         "symbol-placement": "point",
         "text-size": 12,
         "text-font": [
@@ -2012,12 +2012,7 @@
         ["==", "class", "lake"]
       ],
       "layout": {
-        "text-field": {
-          "stops": [
-            [8, "{name_en}"],
-            [13, "{name}"]
-          ]
-        },
+        "text-field": "{name_en}",
         "symbol-placement": "point",
         "text-size": {
           "stops": [
@@ -2056,12 +2051,7 @@
       "source-layer": "water_name",
       "filter": ["all", ["has", "name"], ["==", "$type", "LineString"]],
       "layout": {
-        "text-field": {
-          "stops": [
-            [8, "{name_en}"],
-            [13, "{name}"]
-          ]
-        },
+        "text-field": "{name_en}",
         "symbol-placement": "line",
         "text-size": {
           "stops": [
@@ -2104,12 +2094,7 @@
         ["==", "class", "hamlet"]
       ],
       "layout": {
-        "text-field": {
-          "stops": [
-            [8, "{name_en}"],
-            [14, "{name}"]
-          ]
-        },
+        "text-field": "{name_en}",
         "text-font": [
           "Montserrat Regular",
           "Open Sans Regular",
@@ -2155,12 +2140,7 @@
       "maxzoom": 16,
       "filter": ["all", ["==", "class", "suburb"]],
       "layout": {
-        "text-field": {
-          "stops": [
-            [8, "{name_en}"],
-            [13, "{name}"]
-          ]
-        },
+        "text-field": "{name_en}",
         "text-font": [
           "Montserrat Regular",
           "Open Sans Regular",
@@ -2208,12 +2188,7 @@
       "maxzoom": 16,
       "filter": ["all", ["==", "class", "village"]],
       "layout": {
-        "text-field": {
-          "stops": [
-            [8, "{name_en}"],
-            [13, "{name}"]
-          ]
-        },
+        "text-field": "{name_en}",
         "text-font": [
           "Montserrat Medium",
           "Open Sans Bold",
@@ -2256,12 +2231,7 @@
       "maxzoom": 14,
       "filter": ["all", ["==", "class", "town"]],
       "layout": {
-        "text-field": {
-          "stops": [
-            [8, "{name_en}"],
-            [13, "{name}"]
-          ]
-        },
+        "text-field": "{name_en}",
         "text-font": [
           "Montserrat Medium",
           "Open Sans Bold",
@@ -2407,7 +2377,7 @@
         "text-size": {
           "stops": [
             [5, 12],
-            [7, 14]
+            [7, 13]
           ]
         },
         "text-transform": "uppercase",
@@ -2458,12 +2428,7 @@
       "maxzoom": 15,
       "filter": ["all", ["==", "class", "city"], [">=", "rank", 6]],
       "layout": {
-        "text-field": {
-          "stops": [
-            [8, "{name_en}"],
-            [13, "{name}"]
-          ]
-        },
+        "text-field": "{name_en}",
         "text-font": [
           "Montserrat Medium",
           "Open Sans Bold",
@@ -2511,12 +2476,7 @@
         ["<=", "rank", 5]
       ],
       "layout": {
-        "text-field": {
-          "stops": [
-            [8, "{name_en}"],
-            [13, "{name}"]
-          ]
-        },
+        "text-field": "{name_en}",
         "text-font": [
           "Montserrat Medium",
           "Open Sans Bold",
@@ -2736,7 +2696,7 @@
         ["<=", "rank", 3]
       ],
       "layout": {
-        "text-field": "{name}",
+        "text-field": "{name_en}",
         "text-font": [
           "Montserrat Medium",
           "Open Sans Bold",
@@ -2767,7 +2727,7 @@
       "minzoom": 15,
       "filter": ["all", ["==", "class", "park"]],
       "layout": {
-        "text-field": "{name}",
+        "text-field": "{name_en}",
         "text-font": [
           "Montserrat Medium",
           "Open Sans Bold",
@@ -2807,7 +2767,7 @@
           "NanumBarunGothic Regular"
         ],
         "text-size": 9,
-        "text-field": "{name}",
+        "text-field": "{name_en}",
         "symbol-avoid-edges": false,
         "symbol-spacing": 200,
         "text-pitch-alignment": "auto",
@@ -2843,7 +2803,7 @@
             [18, 12]
           ]
         },
-        "text-field": "{name}",
+        "text-field": "{name_en}",
         "symbol-avoid-edges": false,
         "symbol-spacing": 200,
         "text-pitch-alignment": "auto",
@@ -2880,7 +2840,7 @@
             [18, 12]
           ]
         },
-        "text-field": "{name}",
+        "text-field": "{name_en}",
         "symbol-avoid-edges": false,
         "symbol-spacing": {
           "stops": [
@@ -2928,7 +2888,7 @@
             [18, 12]
           ]
         },
-        "text-field": "{name}",
+        "text-field": "{name_en}",
         "symbol-avoid-edges": false,
         "symbol-spacing": {
           "stops": [
