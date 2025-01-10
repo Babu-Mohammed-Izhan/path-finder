@@ -7,9 +7,9 @@ export const INITIAL_VIEW_STATE = {
 };
 
 export const INITIAL_COLORS = {
-  startNodeFill: [70, 183, 128],
+  startNodeFill: [70, 255, 128],
   startNodeBorder: [255, 255, 255],
-  endNodeFill: [152, 4, 12],
+  endNodeFill: [255, 4, 12],
   endNodeBorder: [0, 0, 0],
   path: [70, 183, 128],
   route: [165, 13, 32],
