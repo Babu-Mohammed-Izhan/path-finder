@@ -2,16 +2,21 @@
 import DeckGL from "@deck.gl/react";
 import { Map as MapGL } from "react-map-gl/maplibre";
 import { INITIAL_COLORS, INITIAL_VIEW_STATE, MAP_STYLE } from "../constants";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { FlyToInterpolator, MapViewState, PickingInfo } from "deck.gl";
+import {
+  FlyToInterpolator,
+  MapViewState,
+  PickingInfo,
+  TripsLayer,
+} from "deck.gl";
 import { MjolnirEvent } from "mjolnir.js";
 import { PolygonLayer, ScatterplotLayer } from "@deck.gl/layers";
 import Node from "../models/Node";
-import { ColorsType, ScatterPlotType } from "../types";
+import { ColorsType, PlotType } from "../types";
 import { getScatterPlotData } from "../hooks/common";
 import { getNearestNodeToPath } from "../helpers";
-import { Color } from "maplibre-gl";
+import PathFinderState from "../models/PathFinderState";
 
 const Map = () => {
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
@@ -19,6 +24,11 @@ const Map = () => {
   const [endNode, setEndNode] = useState<Node | null>(null);
   const [colors, setColors] = useState<ColorsType>(INITIAL_COLORS);
   const [selectionRadius, setSelectionRadius] = useState([]);
+  const [time, setTime] = useState(0);
+  const [path, setPath] = useState<Node[]>([]);
+  const [started, setStarted] = useState(false);
+
+  const state = useRef(new PathFinderState());
 
   function changeLocation(location: MapViewState) {
     setViewState({
@@ -58,7 +68,21 @@ const Map = () => {
     }
   };
 
-  const scatterPlotLayer = new ScatterplotLayer<ScatterPlotType>({
+  const startPathFinding = async () => {
+    setTimeout(() => {
+      clearPath();
+      state.current.start("astar");
+      setStarted(true);
+    }, 400);
+  };
+
+  const clearPath = () => {
+    setStarted(false);
+    setPath([]);
+    setTime(0);
+  };
+
+  const scatterPlotLayer = new ScatterplotLayer<PlotType>({
     id: "the-two-points",
     data: getScatterPlotData(startNode, endNode, colors),
     pickable: true,
@@ -70,8 +94,8 @@ const Map = () => {
     radiusMaxPixels: 20,
     lineWidthMinPixels: 1,
     lineWidthMaxPixels: 1,
-    getPosition: (d: ScatterPlotType) => d.coordinates,
-    getFillColor: (d: ScatterPlotType) => {
+    getPosition: (d: PlotType) => d.coordinates,
+    getFillColor: (d: PlotType) => {
       return [d.color[0], d.color[1], d.color[2], 255]; // Assuming 255 for full opacity
     },
     getLineColor: [0, 0, 0],
@@ -90,6 +114,17 @@ const Map = () => {
     getPolygon: (d: { contour: number[][] }) => d.contour,
   });
 
+  const pathFinderLayer = new TripsLayer({
+    id: "path-finder",
+    data: path,
+    getColor: (d: PlotType) => [d.color[0], d.color[1], d.color[2], 255],
+    opacity: 1,
+    widthMinPixels: 3,
+    widthMaxPixels: 5,
+    fadeTrail: false,
+    time: time,
+  });
+
   return (
     <div
       onContextMenu={(e) => e.preventDefault()}
@@ -98,7 +133,7 @@ const Map = () => {
       <DeckGL
         initialViewState={viewState}
         controller={{ doubleClickZoom: false, keyboard: false }}
-        layers={[polygonLayer, scatterPlotLayer]}
+        layers={[polygonLayer, scatterPlotLayer, pathFinderLayer]}
         style={{ position: "absolute", width: "100%", height: "100%" }}
         onClick={mapClick}
       >
@@ -109,6 +144,20 @@ const Map = () => {
           initialViewState={viewState}
         />
       </DeckGL>
+      <button
+        style={{
+          position: "absolute",
+          top: 10,
+          left: 10,
+          zIndex: 1000,
+          padding: 10,
+          backgroundColor: "white",
+          border: "1px solid black",
+        }}
+        onClick={startPathFinding}
+      >
+        Start Path Finder
+      </button>
     </div>
   );
 };

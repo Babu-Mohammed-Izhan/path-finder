@@ -1,4 +1,4 @@
-export type ScatterPlotType = {
+export type PlotType = {
   coordinates: [number, number]; // Tuple representing longitude and latitude
   color: number[]; // Color for the fill
   lineColor: number[]; // Color for the border

@@ -1,12 +1,12 @@
 import Node from "../models/Node";
-import { ColorsType, ScatterPlotType } from "../types";
+import { ColorsType, PlotType } from "../types";
 
 const getScatterPlotData = (
   startNode: Node | null,
   endNode: Node | null,
   colors: ColorsType
 ) => {
-  const scatterPlotData: ScatterPlotType[] = [
+  const scatterPlotData: PlotType[] = [
     ...(startNode != null
       ? [
           {
