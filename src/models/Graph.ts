@@ -1,7 +1,7 @@
 import Node from "./Node";
 
 export default class Graph {
-  startNode: null;
+  startNode: Node | null;
   nodes: Map<number, Node>;
 
   constructor() {

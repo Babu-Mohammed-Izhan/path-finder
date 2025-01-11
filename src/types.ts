@@ -26,3 +26,8 @@ export type NodeNeighborsType = {
   node: Node;
   edge: Edge;
 };
+
+export type BoundaryBoxType = {
+  latitude: number;
+  longitude: number;
+};

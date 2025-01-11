@@ -18,6 +18,7 @@ import { getScatterPlotData } from "../hooks/common";
 import {
   createCircleBoundary,
   getBoxFromBoundary,
+  getGraphDataFromMap,
   getNearestNodeToPath,
 } from "../helpers";
 import PathFinderState from "../models/PathFinderState";
@@ -31,6 +32,7 @@ const Map = () => {
   const [time, setTime] = useState(0);
   const [pathData, setPathData] = useState<WayPointType[]>([]);
   const [started, setStarted] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const state = useRef(new PathFinderState());
   const requestRef = useRef<number>();
@@ -46,15 +48,30 @@ const Map = () => {
   const mapClick = async (info: PickingInfo, _e: MjolnirEvent) => {
     clearPath();
 
+    const loadingTime = setTimeout(() => {
+      setLoading(true);
+    }, 300);
+
     // Place Start Node and Create Circle Boundry
     if (info.coordinate && startNode == null) {
-      const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
+      const node = await getNearestNodeToPath(
+        info.coordinate[1],
+        info.coordinate[0]
+      );
       setStartNode(node);
       setEndNode(null);
 
       const circleBoundary = createBoudaryCirle(node);
 
       const boudaryBox = getBoxFromBoundary(circleBoundary);
+
+      getGraphDataFromMap(boudaryBox, node.id).then((graph) => {
+        console.log(graph);
+        state.current.graph = graph;
+        clearPath();
+        clearTimeout(loadingTime);
+        setLoading(false);
+      });
     }
 
     // Place End Node
@@ -64,7 +81,15 @@ const Map = () => {
         return;
       }
 
-      const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
+      if (loading) {
+        console.log("Please wait for all data to load.", "info");
+        return;
+      }
+
+      const node = await getNearestNodeToPath(
+        info.coordinate[1],
+        info.coordinate[0]
+      );
       setEndNode(node);
       setSelectionRadius([]);
     }
@@ -72,10 +97,22 @@ const Map = () => {
     // If click map with start and end node already present, reset nodes and place start node
     if (info.coordinate && startNode != null && endNode != null) {
       setEndNode(null);
-      const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
+      const node = await getNearestNodeToPath(
+        info.coordinate[1],
+        info.coordinate[0]
+      );
       setStartNode(node);
 
-      createBoudaryCirle(node);
+      const circleBoundary = createBoudaryCirle(node);
+
+      const boudaryBox = getBoxFromBoundary(circleBoundary);
+
+      const graph = await getGraphDataFromMap(boudaryBox, node.id);
+
+      state.current.graph = graph;
+      clearPath();
+      clearTimeout(loadingTime);
+      setLoading(false);
     }
   };
 
