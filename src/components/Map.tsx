@@ -39,40 +39,49 @@ const Map = () => {
     requestRef.current = requestAnimationFrame(animate);
   }, [started]);
 
-  const mapClick = async (
-    info: PickingInfo,
-    event: MjolnirEvent,
-    radius = null
-  ) => {
+  const mapClick = async (info: PickingInfo, _e: MjolnirEvent) => {
+    clearPath();
+
     // Place Start Node and Create Circle Boundry
     if (info.coordinate && startNode == null) {
       const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
       setStartNode(node);
       setEndNode(null);
 
-      const circleBoundary = createCircleBoundary(
-        node.latitude,
-        node.longitude,
-        5
-      );
-
-      setSelectionRadius([{ contour: circleBoundary }]);
+      createBoudaryCirle(node);
     }
 
     // Place End Node
     if (info.coordinate && startNode != null && endNode == null) {
+      if (info.layer?.id !== "selection-radius") {
+        console.log("Select point inside circle");
+        return;
+      }
+
       const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
       setEndNode(node);
+      setSelectionRadius([]);
     }
 
-    // If click map again, reset nodes and place start node
+    // If click map with start and end node already present, reset nodes and place start node
     if (info.coordinate && startNode != null && endNode != null) {
-      setStartNode(null);
       setEndNode(null);
       const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
       setStartNode(node);
+
+      createBoudaryCirle(node);
     }
   };
+
+  function createBoudaryCirle(node: Node) {
+    const circleBoundary = createCircleBoundary(
+      node.latitude,
+      node.longitude,
+      2
+    );
+
+    setSelectionRadius([{ contour: circleBoundary }]);
+  }
 
   const animate = (time: DOMHighResTimeStamp) => {
     for (let i = 0; i < 5; i++) {
