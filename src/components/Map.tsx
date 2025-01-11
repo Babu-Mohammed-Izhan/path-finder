@@ -15,7 +15,11 @@ import { PolygonLayer, ScatterplotLayer } from "@deck.gl/layers";
 import Node from "../models/Node";
 import { ColorsType, PlotType, WayPointType } from "../types";
 import { getScatterPlotData } from "../hooks/common";
-import { createCircleBoundary, getNearestNodeToPath } from "../helpers";
+import {
+  createCircleBoundary,
+  getBoxFromBoundary,
+  getNearestNodeToPath,
+} from "../helpers";
 import PathFinderState from "../models/PathFinderState";
 
 const Map = () => {
@@ -48,7 +52,9 @@ const Map = () => {
       setStartNode(node);
       setEndNode(null);
 
-      createBoudaryCirle(node);
+      const circleBoundary = createBoudaryCirle(node);
+
+      const boudaryBox = getBoxFromBoundary(circleBoundary);
     }
 
     // Place End Node
@@ -73,7 +79,7 @@ const Map = () => {
     }
   };
 
-  function createBoudaryCirle(node: Node) {
+  function createBoudaryCirle(node: Node): number[][] {
     const circleBoundary = createCircleBoundary(
       node.latitude,
       node.longitude,
@@ -81,6 +87,8 @@ const Map = () => {
     );
 
     setSelectionRadius([{ contour: circleBoundary }]);
+
+    return circleBoundary;
   }
 
   const animate = (time: DOMHighResTimeStamp) => {

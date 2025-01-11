@@ -37,4 +37,31 @@ const createCircleBoundary = (
   return boundry;
 };
 
-export { getNearestNodeToPath, createCircleBoundary };
+const getBoxFromBoundary = (circleBoundary: number[][]) => {
+  // Default BoundaryBox with Maximum values
+  const boundaryBox = {
+    minLat: Number.MAX_VALUE,
+    maxLat: -Number.MAX_VALUE,
+    minLon: Number.MAX_VALUE,
+    maxLon: -Number.MAX_VALUE,
+  };
+
+  // Check all circle values,
+  // for minLat and minLon, if value is smaller than boundaryBox, use that value, default is smallest possible number
+  // for maxLat and maxLon , if value is bigger than boudaryBox, use that value,  default is largest possible number
+  for (const coord of circleBoundary) {
+    if (coord[0] < boundaryBox.minLon) boundaryBox.minLon = coord[0];
+    if (coord[0] > boundaryBox.maxLon) boundaryBox.maxLon = coord[0];
+    if (coord[1] < boundaryBox.minLat) boundaryBox.minLat = coord[1];
+    if (coord[1] > boundaryBox.maxLat) boundaryBox.maxLat = coord[1];
+  }
+
+  const boundaryBoxResult = [
+    { latitude: boundaryBox.minLat, longitude: boundaryBox.minLon },
+    { latitude: boundaryBox.maxLat, longitude: boundaryBox.maxLon },
+  ];
+
+  return boundaryBoxResult;
+};
+
+export { getNearestNodeToPath, createCircleBoundary, getBoxFromBoundary };
