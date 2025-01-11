@@ -15,7 +15,7 @@ import { PolygonLayer, ScatterplotLayer } from "@deck.gl/layers";
 import Node from "../models/Node";
 import { ColorsType, PlotType, WayPointType } from "../types";
 import { getScatterPlotData } from "../hooks/common";
-import { getNearestNodeToPath } from "../helpers";
+import { createCircleBoundary, getNearestNodeToPath } from "../helpers";
 import PathFinderState from "../models/PathFinderState";
 
 const Map = () => {
@@ -23,7 +23,7 @@ const Map = () => {
   const [startNode, setStartNode] = useState<Node | null>(null);
   const [endNode, setEndNode] = useState<Node | null>(null);
   const [colors, setColors] = useState<ColorsType>(INITIAL_COLORS);
-  const [selectionRadius, setSelectionRadius] = useState([]);
+  const [selectionRadius, setSelectionRadius] = useState<any>([]);
   const [time, setTime] = useState(0);
   const [pathData, setPathData] = useState<WayPointType[]>([]);
   const [started, setStarted] = useState(false);
@@ -38,6 +38,41 @@ const Map = () => {
     if (!started) return;
     requestRef.current = requestAnimationFrame(animate);
   }, [started]);
+
+  const mapClick = async (
+    info: PickingInfo,
+    event: MjolnirEvent,
+    radius = null
+  ) => {
+    // Place Start Node and Create Circle Boundry
+    if (info.coordinate && startNode == null) {
+      const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
+      setStartNode(node);
+      setEndNode(null);
+
+      const circleBoundary = createCircleBoundary(
+        node.latitude,
+        node.longitude,
+        5
+      );
+
+      setSelectionRadius([{ contour: circleBoundary }]);
+    }
+
+    // Place End Node
+    if (info.coordinate && startNode != null && endNode == null) {
+      const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
+      setEndNode(node);
+    }
+
+    // If click map again, reset nodes and place start node
+    if (info.coordinate && startNode != null && endNode != null) {
+      setStartNode(null);
+      setEndNode(null);
+      const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
+      setStartNode(node);
+    }
+  };
 
   const animate = (time: DOMHighResTimeStamp) => {
     for (let i = 0; i < 5; i++) {
@@ -95,33 +130,6 @@ const Map = () => {
       transitionInterpolator: new FlyToInterpolator(),
     });
   }
-
-  const mapClick = async (
-    info: PickingInfo,
-    event: MjolnirEvent,
-    radius = null
-  ) => {
-    // Place Start Node
-    if (info.coordinate && startNode == null) {
-      const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
-      setStartNode(node);
-      setEndNode(null);
-    }
-
-    // Place End Node
-    if (info.coordinate && startNode != null && endNode == null) {
-      const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
-      setEndNode(node);
-    }
-
-    // If click map again, reset nodes and place start node
-    if (info.coordinate && startNode != null && endNode != null) {
-      setStartNode(null);
-      setEndNode(null);
-      const node = getNearestNodeToPath(info.coordinate[1], info.coordinate[0]);
-      setStartNode(node);
-    }
-  };
 
   const startPathFinding = async () => {
     setTimeout(() => {
