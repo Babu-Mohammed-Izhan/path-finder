@@ -17,7 +17,7 @@ const getNearestNodeToPath = async (
   for (const node of mapData.elements) {
     if (node.type !== "node") continue;
     if (!result) {
-      result = node;
+      result = new Node(node.id, node.lat, node.lon);
       continue;
     }
 
@@ -29,7 +29,7 @@ const getNearestNodeToPath = async (
     );
 
     if (newLength < resultLength) {
-      result = node;
+      result = new Node(node.id, node.lat, node.lon);
     }
   }
 
@@ -112,8 +112,6 @@ const getGraphDataFromMap = async (
     if (element.type === "node") {
       const node = graph.addNode(element.id, element.lat, element.lon);
 
-      console.log(node.id, startNodeId);
-
       if (node.id === startNodeId) {
         graph.startNode = node;
       }
@@ -133,8 +131,6 @@ const getGraphDataFromMap = async (
       }
     }
   }
-
-  console.log(elements);
 
   return graph;
 };

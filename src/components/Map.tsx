@@ -54,24 +54,36 @@ const Map = () => {
 
     // Place Start Node and Create Circle Boundry
     if (info.coordinate && startNode == null) {
+      const loadingHandle = setTimeout(() => {
+        setLoading(true);
+      }, 300);
+
       const node = await getNearestNodeToPath(
         info.coordinate[1],
         info.coordinate[0]
       );
+
+      if (!node) {
+        console.log(
+          "No path was found in the vicinity, please try another location."
+        );
+        clearTimeout(loadingHandle);
+        setLoading(false);
+        return;
+      }
       setStartNode(node);
       setEndNode(null);
-
       const circleBoundary = createBoudaryCirle(node);
-
       const boudaryBox = getBoxFromBoundary(circleBoundary);
 
-      getGraphDataFromMap(boudaryBox, node.id).then((graph) => {
-        console.log(graph);
-        state.current.graph = graph;
-        clearPath();
-        clearTimeout(loadingTime);
-        setLoading(false);
-      });
+      // Create graph using map Data
+      const graph = await getGraphDataFromMap(boudaryBox, node.id);
+      console.log("graph");
+      console.log(graph);
+      state.current.graph = graph;
+      clearPath();
+      clearTimeout(loadingTime);
+      setLoading(false);
     }
 
     // Place End Node
