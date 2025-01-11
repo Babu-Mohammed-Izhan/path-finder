@@ -9,7 +9,7 @@ export default class Node {
   visited: boolean;
   distanceFromStart: number = 0;
   distanceToEnd: number = 0;
-  parent: null = null;
+  parent: Node | null = null;
   referer: Node | null = null;
   neighbors: NodeNeighborsType[] = [];
 

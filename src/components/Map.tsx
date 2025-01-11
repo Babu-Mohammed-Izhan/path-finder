@@ -2,7 +2,7 @@
 import DeckGL from "@deck.gl/react";
 import { Map as MapGL } from "react-map-gl/maplibre";
 import { INITIAL_COLORS, INITIAL_VIEW_STATE, MAP_STYLE } from "../constants";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
   FlyToInterpolator,
@@ -13,7 +13,7 @@ import {
 import { MjolnirEvent } from "mjolnir.js";
 import { PolygonLayer, ScatterplotLayer } from "@deck.gl/layers";
 import Node from "../models/Node";
-import { ColorsType, PlotType } from "../types";
+import { ColorsType, PlotType, WayPointType } from "../types";
 import { getScatterPlotData } from "../hooks/common";
 import { getNearestNodeToPath } from "../helpers";
 import PathFinderState from "../models/PathFinderState";
@@ -25,10 +25,65 @@ const Map = () => {
   const [colors, setColors] = useState<ColorsType>(INITIAL_COLORS);
   const [selectionRadius, setSelectionRadius] = useState([]);
   const [time, setTime] = useState(0);
-  const [path, setPath] = useState<Node[]>([]);
+  const [pathData, setPathData] = useState<WayPointType[]>([]);
   const [started, setStarted] = useState(false);
 
   const state = useRef(new PathFinderState());
+  const requestRef = useRef<number>();
+  const previousTimeRef = useRef<number>();
+  const wayPoints = useRef<WayPointType[]>([]);
+  const timer = useRef(0);
+
+  useEffect(() => {
+    if (!started) return;
+    requestRef.current = requestAnimationFrame(animate);
+  }, [started]);
+
+  const animate = (time: DOMHighResTimeStamp) => {
+    for (let i = 0; i < 5; i++) {
+      animateStep(time);
+    }
+
+    previousTimeRef.current = time;
+    requestRef.current = requestAnimationFrame(animate);
+  };
+
+  const animateStep = (time: DOMHighResTimeStamp) => {
+    const updateNodes = state.current.nextStep();
+    for (const node of updateNodes) {
+      updateWayPoint(node, node.referer);
+    }
+  };
+
+  const updateWayPoint = (
+    node: Node,
+    refererNode: Node | null,
+    color = "path",
+    timeMultiplier = 1
+  ) => {
+    if (refererNode === null) return;
+    const distance = Math.hypot(
+      node.latitude - refererNode.latitude,
+      node.longitude - refererNode.longitude
+    );
+
+    const timeAdd = distance * 50000 * timeMultiplier;
+
+    wayPoints.current = [
+      ...wayPoints.current,
+      {
+        path: [
+          [refererNode.longitude, refererNode.latitude],
+          [node.longitude, node.latitude],
+        ],
+        timestamps: [timer.current, timer.current + timeAdd],
+        color,
+      },
+    ];
+
+    timer.current += timeAdd;
+    setPathData(() => wayPoints.current);
+  };
 
   function changeLocation(location: MapViewState) {
     setViewState({
@@ -71,14 +126,14 @@ const Map = () => {
   const startPathFinding = async () => {
     setTimeout(() => {
       clearPath();
-      state.current.start("astar");
+      state.current.start("dijkstra");
       setStarted(true);
     }, 400);
   };
 
   const clearPath = () => {
     setStarted(false);
-    setPath([]);
+    setPathData([]);
     setTime(0);
   };
 
@@ -116,7 +171,7 @@ const Map = () => {
 
   const pathFinderLayer = new TripsLayer({
     id: "path-finder",
-    data: path,
+    data: pathData,
     getColor: (d: PlotType) => [d.color[0], d.color[1], d.color[2], 255],
     opacity: 1,
     widthMinPixels: 3,
@@ -156,7 +211,7 @@ const Map = () => {
         }}
         onClick={startPathFinding}
       >
-        Start Path Finder
+        Start Path Finding
       </button>
     </div>
   );

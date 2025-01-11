@@ -1,3 +1,6 @@
+import Edge from "./models/Edge";
+import Node from "./models/Node";
+
 export type PlotType = {
   coordinates: [number, number]; // Tuple representing longitude and latitude
   color: number[]; // Color for the fill
@@ -11,4 +14,15 @@ export type ColorsType = {
   endNodeBorder: number[];
   path: number[];
   route: number[];
+};
+
+export type WayPointType = {
+  path: [[number, number], [number, number]];
+  timestamps: number[];
+  color: string;
+};
+
+export type NodeNeighborsType = {
+  node: Node;
+  edge: Edge;
 };
