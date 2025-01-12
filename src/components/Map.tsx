@@ -5,6 +5,7 @@ import { INITIAL_COLORS, INITIAL_VIEW_STATE, MAP_STYLE } from "../constants";
 import { useEffect, useRef, useState } from "react";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
+  Color,
   FlyToInterpolator,
   MapViewState,
   PickingInfo,
@@ -33,6 +34,7 @@ const Map = () => {
   const [pathData, setPathData] = useState<WayPointType[]>([]);
   const [started, setStarted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [playbackDirection, setPlaybackDirection] = useState(1);
 
   const state = useRef(new PathFinderState());
   const requestRef = useRef<number>();
@@ -78,8 +80,6 @@ const Map = () => {
 
       // Create graph using map Data
       const graph = await getGraphDataFromMap(boudaryBox, node.id);
-      console.log("graph");
-      console.log(graph);
       state.current.graph = graph;
       clearPath();
       clearTimeout(loadingTime);
@@ -103,6 +103,15 @@ const Map = () => {
         info.coordinate[0]
       );
       setEndNode(node);
+
+      const realEndNode = state.current.getNode(node.id);
+
+      if (!realEndNode) {
+        console.log("An error occurred. Please try again.");
+        return;
+      }
+      state.current.endNode = realEndNode;
+
       setSelectionRadius([]);
     }
 
@@ -149,10 +158,15 @@ const Map = () => {
     requestRef.current = requestAnimationFrame(animate);
   };
 
-  const animateStep = (time: DOMHighResTimeStamp) => {
+  const animateStep = (newTime: DOMHighResTimeStamp) => {
     const updateNodes = state.current.nextStep();
     for (const node of updateNodes) {
       updateWayPoint(node, node.referer);
+    }
+
+    if (previousTimeRef.current != null) {
+      const deltaTime = newTime - previousTimeRef.current;
+      setTime((prevTime) => prevTime + deltaTime * playbackDirection);
     }
   };
 
@@ -183,7 +197,7 @@ const Map = () => {
     ];
 
     timer.current += timeAdd;
-    setPathData(() => wayPoints.current);
+    setPathData(wayPoints.current);
   };
 
   function changeLocation(location: MapViewState) {
@@ -243,15 +257,17 @@ const Map = () => {
     getPolygon: (d: { contour: number[][] }) => d.contour,
   });
 
-  const pathFinderLayer = new TripsLayer({
+  const pathFinderLayer = new TripsLayer<WayPointType>({
     id: "path-finder",
     data: pathData,
-    getColor: (d: PlotType) => [d.color[0], d.color[1], d.color[2], 255],
+    getPath: (d) => d.path.map((p) => p),
+    getTimestamps: (d) => d.timestamps.map((p) => p),
     opacity: 1,
     widthMinPixels: 3,
     widthMaxPixels: 5,
     fadeTrail: false,
-    time: time,
+    currentTime: time,
+    getColor: colors.path as Color,
   });
 
   return (
@@ -262,7 +278,7 @@ const Map = () => {
       <DeckGL
         initialViewState={viewState}
         controller={{ doubleClickZoom: false, keyboard: false }}
-        layers={[polygonLayer, scatterPlotLayer, pathFinderLayer]}
+        layers={[pathFinderLayer, polygonLayer, scatterPlotLayer]}
         style={{ position: "absolute", width: "100%", height: "100%" }}
         onClick={mapClick}
       >

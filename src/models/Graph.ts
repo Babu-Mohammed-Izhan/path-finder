@@ -1,11 +1,10 @@
 import Node from "./Node";
 
 export default class Graph {
-  startNode: Node | null;
+  startNode: Node = new Node(0, 0, 0);
   nodes: Map<number, Node>;
 
   constructor() {
-    this.startNode = null;
     this.nodes = new Map();
   }
 

@@ -17,7 +17,7 @@ export type ColorsType = {
 };
 
 export type WayPointType = {
-  path: [[number, number], [number, number]];
+  path: [number, number][];
   timestamps: number[];
   color: string;
 };

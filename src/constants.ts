@@ -11,7 +11,7 @@ export const INITIAL_COLORS = {
   startNodeBorder: [255, 255, 255],
   endNodeFill: [255, 4, 12],
   endNodeBorder: [0, 0, 0],
-  path: [70, 183, 128],
+  path: [200, 160, 240],
   route: [165, 13, 32],
 };
 
