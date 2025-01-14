@@ -23,13 +23,14 @@ import {
   getNearestNodeToPath,
 } from "../helpers";
 import PathFinderState from "../models/PathFinderState";
+import { useControls } from "leva";
 
 const Map = () => {
   const [viewState, setViewState] = useState<MapViewState>(INITIAL_VIEW_STATE);
   const [startNode, setStartNode] = useState<Node | null>(null);
   const [endNode, setEndNode] = useState<Node | null>(null);
   const [colors, setColors] = useState<ColorsType>(INITIAL_COLORS);
-  const [selectionRadius, setSelectionRadius] = useState<any>([]);
+  const [selectionCircle, setSelectionCircle] = useState<any>([]);
   const [time, setTime] = useState(0);
   const [pathData, setPathData] = useState<WayPointType[]>([]);
   const [started, setStarted] = useState(false);
@@ -44,10 +45,29 @@ const Map = () => {
   const timer = useRef(0);
   const routeNode = useRef<Node>();
 
+  const { selectionRadius } = useControls({
+    selectionRadius: { value: 3, min: 2, max: 8, step: 1 },
+  });
+
   useEffect(() => {
     if (!started) return;
     requestRef.current = requestAnimationFrame(animate);
   }, [started, animationEnded, time]);
+
+  useEffect(() => {
+    const resizeSelectionCircle = async () => {
+      if (startNode) {
+        setSelectionCircle([]);
+        const circleBoundary = createBoudaryCirle(startNode);
+        const boudaryBox = getBoxFromBoundary(circleBoundary);
+
+        const graph = await getGraphDataFromMap(boudaryBox, startNode.id);
+        state.current.graph = graph;
+      }
+    };
+
+    resizeSelectionCircle();
+  }, [selectionRadius]);
 
   const mapClick = async (info: PickingInfo, _e: MjolnirEvent) => {
     if (started && !animationEnded) return;
@@ -115,7 +135,7 @@ const Map = () => {
       }
       state.current.endNode = realEndNode;
 
-      setSelectionRadius([]);
+      setSelectionCircle([]);
     }
 
     // If click map with start and end node already present, reset nodes and place start node
@@ -144,10 +164,10 @@ const Map = () => {
     const circleBoundary = createCircleBoundary(
       node.latitude,
       node.longitude,
-      2
+      selectionRadius
     );
 
-    setSelectionRadius([{ contour: circleBoundary }]);
+    setSelectionCircle([{ contour: circleBoundary }]);
 
     return circleBoundary;
   }
@@ -275,11 +295,11 @@ const Map = () => {
 
   const polygonLayer = new PolygonLayer({
     id: "selection-radius",
-    data: selectionRadius,
+    data: selectionCircle,
     pickable: true,
     stroked: true,
-    getFillColor: [80, 210, 0, 10],
-    getLineColor: [9, 142, 46, 175],
+    getFillColor: (): Color => [...colors.startNodeFill, 20] as Color,
+    getLineColor: (): Color => [...colors.startNodeBorder, 175] as Color,
     getLineWidth: 3,
     opacity: 1,
     getPolygon: (d: { contour: number[][] }) => d.contour,
