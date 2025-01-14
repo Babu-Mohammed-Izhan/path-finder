@@ -7,12 +7,12 @@ export const INITIAL_VIEW_STATE = {
 };
 
 export const INITIAL_COLORS = {
-  startNodeFill: [70, 255, 128],
+  startNodeFill: [140, 138, 255],
   startNodeBorder: [255, 255, 255],
-  endNodeFill: [255, 4, 12],
+  endNodeFill: [247, 233, 153],
   endNodeBorder: [0, 0, 0],
-  path: [200, 160, 240],
-  route: [165, 13, 32],
+  path: [85, 82, 247],
+  route: [255, 243, 176],
 };
 
 export const MAP_STYLE = "./map_style.json";
