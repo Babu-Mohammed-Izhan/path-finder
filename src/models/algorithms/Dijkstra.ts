@@ -33,6 +33,13 @@ export default class Dijkstra extends PathfindingAlgorithm {
     // Mark the referer edge as visited
     if (refEdge) refEdge.visited = true;
 
+    // If end node is found
+    if (currentNode.id === this.endNode.id) {
+      this.openList = [];
+      this.finished = true;
+      return [currentNode];
+    }
+
     // Iterate through all the neighbors of the current node
     for (const n of currentNode.neighbours) {
       const neighbor = n.node;
