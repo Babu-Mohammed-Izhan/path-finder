@@ -39,7 +39,7 @@ const Map = () => {
 
   const state = useRef(new PathFinderState());
   const requestRef = useRef<number>();
-  const previousTimeRef = useRef<number>();
+  const previousTimeRef = useRef<number | null>();
   const wayPoints = useRef<WayPointType[]>([]);
   const timer = useRef(0);
   const routeNode = useRef<Node>();
@@ -47,9 +47,10 @@ const Map = () => {
   useEffect(() => {
     if (!started) return;
     requestRef.current = requestAnimationFrame(animate);
-  }, [started]);
+  }, [started, animationEnded, time]);
 
   const mapClick = async (info: PickingInfo, _e: MjolnirEvent) => {
+    if (started && !animationEnded) return;
     clearPath();
 
     const loadingTime = setTimeout(() => {
@@ -179,7 +180,7 @@ const Map = () => {
       }
     }
 
-    if (previousTimeRef.current != null) {
+    if (previousTimeRef.current != null && !animationEnded) {
       const deltaTime = newTime - previousTimeRef.current;
       setTime((prevTime) => prevTime + deltaTime * playbackDirection);
     }
@@ -236,8 +237,14 @@ const Map = () => {
 
   const clearPath = () => {
     setStarted(false);
+    setAnimationEnded(false);
     setPathData([]);
     setTime(0);
+    wayPoints.current = [];
+    timer.current = 0;
+    previousTimeRef.current = null;
+    routeNode.current = undefined;
+    state.current.reset();
   };
 
   const resetAll = () => {

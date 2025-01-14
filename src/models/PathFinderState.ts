@@ -40,4 +40,13 @@ export default class PathFinderState {
 
     return updatedNodes;
   }
+
+  reset() {
+    this.finished = false;
+    if (this.graph) {
+      for (const k of this.graph.nodes.keys()) {
+        this.graph.nodes.get(k)?.reset();
+      }
+    }
+  }
 }
