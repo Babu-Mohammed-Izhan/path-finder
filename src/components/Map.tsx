@@ -35,12 +35,14 @@ const Map = () => {
   const [started, setStarted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [playbackDirection, setPlaybackDirection] = useState(1);
+  const [animationEnded, setAnimationEnded] = useState(false);
 
   const state = useRef(new PathFinderState());
   const requestRef = useRef<number>();
   const previousTimeRef = useRef<number>();
   const wayPoints = useRef<WayPointType[]>([]);
   const timer = useRef(0);
+  const routeNode = useRef<Node>();
 
   useEffect(() => {
     if (!started) return;
@@ -164,6 +166,19 @@ const Map = () => {
       updateWayPoint(node, node.referer);
     }
 
+    // If endNode is found, show the route from start node to end node
+    if (state.current.finished && !animationEnded) {
+      if (!routeNode.current) {
+        routeNode.current = state.current.endNode;
+      }
+      const parentRouteNode = routeNode.current.parent;
+      if (parentRouteNode) {
+        updateWayPoint(parentRouteNode, routeNode.current, "route", 5);
+        routeNode.current = parentRouteNode ?? routeNode.current;
+        setAnimationEnded(time >= timer.current && parentRouteNode == null);
+      }
+    }
+
     if (previousTimeRef.current != null) {
       const deltaTime = newTime - previousTimeRef.current;
       setTime((prevTime) => prevTime + deltaTime * playbackDirection);
@@ -173,7 +188,7 @@ const Map = () => {
   const updateWayPoint = (
     node: Node,
     refererNode: Node | null,
-    color = "path",
+    color: keyof ColorsType = "path",
     timeMultiplier = 1
   ) => {
     if (refererNode === null) return;
@@ -225,6 +240,12 @@ const Map = () => {
     setTime(0);
   };
 
+  const resetAll = () => {
+    clearPath();
+    setStartNode(null);
+    setEndNode(null);
+  };
+
   const scatterPlotLayer = new ScatterplotLayer<PlotType>({
     id: "the-two-points",
     data: getScatterPlotData(startNode, endNode, colors),
@@ -267,7 +288,7 @@ const Map = () => {
     widthMaxPixels: 5,
     fadeTrail: false,
     currentTime: time,
-    getColor: colors.path as Color,
+    getColor: (d: WayPointType) => colors[d.color] as Color,
   });
 
   return (
@@ -299,9 +320,9 @@ const Map = () => {
           backgroundColor: "white",
           border: "1px solid black",
         }}
-        onClick={startPathFinding}
+        onClick={started ? resetAll : startPathFinding}
       >
-        Start Path Finding
+        {started ? "Reset" : "Start Path Finding"}
       </button>
     </div>
   );
